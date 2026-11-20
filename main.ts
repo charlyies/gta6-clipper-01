@@ -40,7 +40,7 @@ try {
 }
 if (
   typeof address !== "string" ||
-  !/^https:\/\/(www\.youtube\.com\/(shorts\/|watch\?v=)|youtu\.be\/)/.test(address)
+  !/^https:\/\/(www\.)?(youtube\.com\/(shorts\/|watch\?v=)|youtu\.be\/)/.test(address)
 ) {
   console.error(`VIDEO.json does not name a YouTube video: ${String(address)}`);
   process.exit(1);
