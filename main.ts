@@ -18,7 +18,7 @@
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 // Afterwards out/VIDEO.json is identical to ./VIDEO.json.
 
-import { copyFileSync, mkdirSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Inside the grader these are /bot and /output; the env vars let the same
@@ -28,6 +28,23 @@ const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
 const source = join(repoDir, "VIDEO.json");
 const target = join(outDir, "VIDEO.json");
+
+// The entry is a video address, so a placeholder or a malformed address
+// must fail loudly here instead of reaching the grader as a copy of junk.
+let address: unknown;
+try {
+  address = JSON.parse(readFileSync(source, "utf8")).url;
+} catch (error) {
+  console.error(`could not read VIDEO.json from ${repoDir}: ${(error as Error).message}`);
+  process.exit(1);
+}
+if (
+  typeof address !== "string" ||
+  !/^https:\/\/(www\.youtube\.com\/(shorts\/|watch\?v=)|youtu\.be\/)/.test(address)
+) {
+  console.error(`VIDEO.json does not name a YouTube video: ${String(address)}`);
+  process.exit(1);
+}
 
 mkdirSync(outDir, { recursive: true });
 
